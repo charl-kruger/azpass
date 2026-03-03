@@ -240,9 +240,3 @@ import {
 ```
 
 All exports are fully typed. See the source in `src/` for the complete API surface.
-
----
-
-## Credits
-
-> 💙 This package was templated with [`create-typescript-app`](https://github.com/JoshuaKGoldberg/create-typescript-app).

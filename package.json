@@ -1,6 +1,6 @@
 {
 	"name": "azpass",
-	"version": "1.8.3",
+	"version": "0.0.2",
 	"description": "Authenticate npm to Azure DevOps private feeds in one command",
 	"keywords": [
 		"azure",
@@ -79,6 +79,6 @@
 		"node": ">=18.3.0"
 	},
 	"publishConfig": {
-		"provenance": true
+		"access": "public"
 	}
 }
