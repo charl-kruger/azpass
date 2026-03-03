@@ -1,0 +1,5 @@
+import { readFileSafe } from "./read-file-safe.js";
+
+export async function readFileSafeAsJson(filePath: string | URL) {
+	return JSON.parse(await readFileSafe(filePath, "null")) as unknown;
+}

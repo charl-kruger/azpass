@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 
 import { allArgOptions } from "../shared/options/args.js";
 
@@ -27,9 +27,19 @@ export function logHelpText(introLogs: string[]): void {
 	}
 
 	console.log(
-		chalk.cyan(
+		pc.cyan(
 			`Configure local development environments for Azure apps with one command`,
 		),
+	);
+
+	console.log(" ");
+	console.log(pc.bgGreen(pc.black("Subcommands:")));
+	console.log(
+		pc.cyan(`
+  azpass config list                  List all saved config values
+  azpass config get <key>             Get a saved config value
+  azpass config set <key> <value>     Save a config value (keys: daysToExpiry, email, organization, project, feed)
+  azpass status                       Show auth status for all Azure DevOps feeds in ~/.npmrc`),
 	);
 
 	for (const section of helpTextSections) {
@@ -78,24 +88,22 @@ function createHelpTextSections(): HelpTextSection[] {
 function logHelpTextSection(section: HelpTextSection): void {
 	console.log(" ");
 
-	console.log(chalk.black.bgGreenBright(section.sectionHeading));
+	console.log(pc.bgGreen(pc.black(section.sectionHeading)));
 
 	for (const subsection of section.subsections) {
 		if (subsection.warning) {
-			console.log(chalk.yellow(subsection.warning));
+			console.log(pc.yellow(subsection.warning));
 		}
 
 		if (subsection.subheading) {
-			console.log(chalk.green(subsection.subheading));
+			console.log(pc.green(subsection.subheading));
 		}
 
 		for (const { description, flag, short, type } of subsection.flags) {
 			console.log(
-				chalk.cyan(
+				pc.cyan(
 					`
-  -${short} | --${flag}${
-		type !== "boolean" ? ` (${chalk.cyanBright(type)})` : ""
-	}: ${description}`,
+  -${short} | --${flag}${type !== "boolean" ? ` (${pc.cyan(type)})` : ""}: ${description}`,
 				),
 			);
 		}

@@ -8,7 +8,7 @@ function makeProxy<T extends object>(receiver: T): T {
 	});
 }
 
-vi.mock("chalk", () => ({
+vi.mock("picocolors", () => ({
 	default: makeProxy({}),
 }));
 
@@ -28,6 +28,19 @@ describe("logHelpText", () => {
 			[
 			  [
 			    "Configure local development environments for Azure apps with one command",
+			  ],
+			  [
+			    " ",
+			  ],
+			  [
+			    "Subcommands:",
+			  ],
+			  [
+			    "
+			  azpass config list                  List all saved config values
+			  azpass config get <key>             Get a saved config value
+			  azpass config set <key> <value>     Save a config value (keys: daysToExpiry, email, organization, project, feed)
+			  azpass status                       Show auth status for all Azure DevOps feeds in ~/.npmrc",
 			  ],
 			  [
 			    " ",
@@ -56,7 +69,11 @@ describe("logHelpText", () => {
 			  ],
 			  [
 			    "
-			  -w | --what-if: If provided, will not write output to to a user .npmrc file; will instead print to stdout",
+			  -w | --what-if: If provided, will not write to the user .npmrc file; will instead print to stdout",
+			  ],
+			  [
+			    "
+			  -x | --force: If provided, bypasses CI environment detection and writes the user .npmrc file",
 			  ],
 			  [
 			    "
@@ -72,7 +89,7 @@ describe("logHelpText", () => {
 			  ],
 			  [
 			    "
-			  -r | --registry (string): The registry to use, eg 'https://pkgs.dev.azure.com/johnnyreilly/_packaging/npmrc-script-organization/npm/registry/' - only required if not parsing from the .npmrc file",
+			  -r | --registry (string): The registry to use, eg 'https://pkgs.dev.azure.com/charlkruger/_packaging/npmrc-script-organization/npm/registry/' - only required if not parsing from the .npmrc file",
 			  ],
 			  [
 			    "

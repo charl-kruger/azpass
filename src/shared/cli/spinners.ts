@@ -1,5 +1,5 @@
 import * as prompts from "@clack/prompts";
-import chalk from "chalk";
+import pc from "picocolors";
 
 import {
 	type Logger,
@@ -7,7 +7,7 @@ import {
 	makeSpinnerLogger,
 	type SpinnerLogger,
 } from "./logger.js";
-import { lowerFirst } from "./lowerFirst.js";
+import { lowerFirst } from "./lower-first.js";
 
 const spinner = prompts.spinner();
 
@@ -20,7 +20,7 @@ export async function withSpinner<Return>(
 	logger: Logger,
 	task: SpinnerTask<Return>,
 ) {
-	logger.info(chalk.green(`🎬 Starting ${lowerFirst(label)}.`));
+	logger.info(pc.green(`🎬 Starting ${lowerFirst(label)}.`));
 
 	const spinnerLogger = makeSpinnerLogger(makeLogger());
 
@@ -29,13 +29,13 @@ export async function withSpinner<Return>(
 	try {
 		const result = await task(spinnerLogger);
 
-		spinner.stop(chalk.green(`✅ Passed ${lowerFirst(label)}.`));
+		spinner.stop(pc.green(`✅ Passed ${lowerFirst(label)}.`));
 
 		spinnerLogger.flush();
 
 		return result;
 	} catch (error) {
-		spinner.error(chalk.red(`❌ Error ${lowerFirst(label)}.`));
+		spinner.error(pc.red(`❌ Error ${lowerFirst(label)}.`));
 
 		spinnerLogger.flush();
 

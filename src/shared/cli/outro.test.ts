@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import pc from "picocolors";
 import { beforeEach, describe, expect, it, MockInstance, vi } from "vitest";
 
 import { outro } from "./outro.js";
@@ -24,9 +24,9 @@ describe("outro", () => {
 		outro([{ label: "Abc 123" }]);
 
 		expect(mockConsoleLog.mock.calls).toEqual([
-			[chalk.blue("Abc 123")],
+			[pc.blue("Abc 123")],
 			[],
-			[chalk.greenBright(`See ya! 👋`)],
+			[pc.green(`See ya! 👋`)],
 			[],
 		]);
 	});
@@ -35,12 +35,12 @@ describe("outro", () => {
 		outro([{ label: "Abc 123", lines: ["one", "two"] }]);
 
 		expect(mockConsoleLog.mock.calls).toEqual([
-			[chalk.blue("Abc 123")],
+			[pc.blue("Abc 123")],
 			[],
 			["one"],
 			["two"],
 			[],
-			[chalk.greenBright(`See ya! 👋`)],
+			[pc.green(`See ya! 👋`)],
 			[],
 		]);
 	});
@@ -49,12 +49,12 @@ describe("outro", () => {
 		outro([{ label: "Abc 123", lines: ["one", "two"], variant: "code" }]);
 
 		expect(mockConsoleLog.mock.calls).toEqual([
-			[chalk.blue("Abc 123")],
+			[pc.blue("Abc 123")],
 			[],
-			[chalk.gray("one")],
-			[chalk.gray("two")],
+			[pc.gray("one")],
+			[pc.gray("two")],
 			[],
-			[chalk.greenBright(`See ya! 👋`)],
+			[pc.green(`See ya! 👋`)],
 			[],
 		]);
 	});

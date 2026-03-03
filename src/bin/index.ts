@@ -1,6 +1,6 @@
 import * as prompts from "@clack/prompts";
-import chalk from "chalk";
 import ci from "ci-info";
+import pc from "picocolors";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { fromZodError } from "zod-validation-error";
@@ -12,19 +12,24 @@ import {
 	projectNpmrcParse,
 	writeNpmrc,
 } from "../index.js";
-import { projectNpmrcRegistry } from "../projectNpmrcRegistry.js";
+import { readConfig } from "../config/read-config.js";
+import { projectNpmrcRegistry } from "../project-npmrc-registry.js";
 import { withSpinner } from "../shared/cli/spinners.js";
 import { StatusCodes } from "../shared/codes.js";
 import { options } from "../shared/options/args.js";
-import { optionsSchema } from "../shared/options/optionsSchema.js";
+import { optionsSchema } from "../shared/options/options-schema.js";
+import { handleConfigCmd } from "./config-cmd.js";
+import { handleStatusCmd } from "./status-cmd.js";
 import { logHelpText } from "./help.js";
-import { getVersionFromPackageJson } from "./packageJson.js";
+import { getVersionFromPackageJson } from "./package-json.js";
 
 const operationMessage = (verb: string) =>
 	`Operation ${verb}. Exiting - maybe another time? 👋`;
 
 export async function bin(args: string[]) {
-	console.clear();
+	// Subcommand dispatch (before any parseArgs processing)
+	if (args[0] === "config") return handleConfigCmd(args.slice(1));
+	if (args[0] === "status") return handleStatusCmd();
 
 	const logger = {
 		info: (message = "") => {
@@ -37,8 +42,8 @@ export async function bin(args: string[]) {
 
 	const version = await getVersionFromPackageJson();
 
-	const introPrompts = `${chalk.blueBright(`📦🔑 Welcome to`)} ${chalk.bgBlueBright.black(`azdo-npm-auth`)} ${chalk.blueBright(`${version}! 📦🔑`)}`;
-	const outroPrompts = `${chalk.blueBright(`📦🔑 Thanks for using`)} ${chalk.bgBlueBright.black(`azdo-npm-auth`)} ${chalk.blueBright(`${version}! 📦🔑`)}`;
+	const introPrompts = `${pc.blue(`📦🔑 Welcome to`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}! 📦🔑`)}`;
+	const outroPrompts = `${pc.blue(`📦🔑 Thanks for using`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}! 📦🔑`)}`;
 
 	const { values } = parseArgs({
 		args,
@@ -58,26 +63,43 @@ export async function bin(args: string[]) {
 
 	prompts.intro(introPrompts);
 
+	const globalConfig = await readConfig();
+
+	// Environment variables provide a more secure alternative to CLI flags,
+	// since CLI args are visible in process lists (ps aux).
+	// Precedence (low → high): global config → env vars → CLI flags
 	const mappedOptions = {
 		whatIf: values["what-if"],
-		pat: values.pat,
+		force: values.force,
+		pat: values.pat ?? process.env.AZDO_NPM_AUTH_PAT,
 		config: values.config,
-		organization: values.organization,
-		project: values.project,
-		feed: values.feed,
-		registry: values.registry,
-		email: values.email,
-		daysToExpiry: values.daysToExpiry ? Number(values.daysToExpiry) : undefined,
+		organization:
+			values.organization ??
+			process.env.AZDO_NPM_AUTH_ORGANIZATION ??
+			globalConfig.organization,
+		project:
+			values.project ??
+			process.env.AZDO_NPM_AUTH_PROJECT ??
+			globalConfig.project,
+		feed: values.feed ?? process.env.AZDO_NPM_AUTH_FEED ?? globalConfig.feed,
+		registry: values.registry ?? process.env.AZDO_NPM_AUTH_REGISTRY,
+		email: values.email ?? globalConfig.email,
+		daysToExpiry:
+			values.daysToExpiry !== undefined
+				? Number(values.daysToExpiry)
+				: globalConfig.daysToExpiry,
 	};
 
 	const optionsParseResult = optionsSchema.safeParse(mappedOptions);
 
 	if (!optionsParseResult.success) {
 		logger.error(
-			chalk.red(
-				fromZodError(optionsParseResult.error, {
-					issueSeparator: "\n    - ",
-				}),
+			pc.red(
+				String(
+					fromZodError(optionsParseResult.error, {
+						issueSeparator: "\n    - ",
+					}),
+				),
 			),
 		);
 
@@ -89,6 +111,7 @@ export async function bin(args: string[]) {
 
 	const {
 		whatIf,
+		force,
 		config,
 		organization,
 		project,
@@ -99,10 +122,9 @@ export async function bin(args: string[]) {
 		daysToExpiry,
 	} = optionsParseResult.data;
 
-	// TODO: this will prevent this file from running tests on the server after this - create an override parameter?
-	if (ci.isCI) {
+	if (ci.isCI && !force) {
 		logger.error(
-			`Detected that you are running on a CI server (${ci.name ?? ""}) and so will not generate a user .npmrc file`,
+			`Detected that you are running on a CI server (${ci.name ?? ""}) and so will not generate a user .npmrc file. Use --force to override.`,
 		);
 		prompts.outro(outroPrompts);
 
@@ -120,14 +142,14 @@ export async function bin(args: string[]) {
 		(projectNpmrcMode === "registry"
 			? `- registry: ${registry ?? ""}`
 			: projectNpmrcMode === "parse"
-				? `- config: ${config ?? "[NONE SUPPLIED - WILL USE DEFAULT LOCATION]"}`
+				? `- config: ${config ?? "[default: <cwd>/.npmrc]"}`
 				: `- organization: ${organization ?? ""}\n- project: ${project ?? ""}\n- feed: ${feed ?? ""}`);
 
 	prompts.log.info(
-		`options:${whatIf ? "\n- what-if" : ""}
-- pat: ${pat ? "supplied" : "[NONE SUPPLIED - WILL ACQUIRE FROM AZURE]"}
-- email: ${email ?? "[NONE SUPPLIED - WILL USE DEFAULT VALUE]"}
-- daysToExpiry: ${daysToExpiry ? daysToExpiry.toLocaleString() : "[NONE SUPPLIED - API WILL DETERMINE EXPIRY]"}
+		`options:${whatIf ? "\n- what-if" : ""}${force ? "\n- force" : ""}
+- pat: ${pat ? "supplied" : "[will acquire from Azure CLI]"}
+- email: ${email ?? "[default ADO value]"}
+- daysToExpiry: ${daysToExpiry !== undefined ? daysToExpiry.toLocaleString() : "[API will determine expiry]"}
 ${optionsSuffix}`,
 	);
 
@@ -173,18 +195,23 @@ ${optionsSuffix}`,
 					}),
 				);
 
+		const validTo =
+			"validTo" in personalAccessToken.patToken
+				? personalAccessToken.patToken.validTo
+				: undefined;
+
 		const npmrc = await withSpinner(
 			`Constructing user .npmrc`,
 			logger,
-			(logger) =>
+			(_logger) =>
 				Promise.resolve(
 					parsedProjectNpmrcs
 						.map((parsedProjectNpmrc) =>
 							createUserNpmrc({
 								parsedProjectNpmrc,
 								email,
-								logger,
 								pat: personalAccessToken.patToken.token,
+								validTo,
 							}),
 						)
 						.join("\n"),
@@ -192,7 +219,9 @@ ${optionsSuffix}`,
 		);
 
 		if (whatIf) {
+			console.log(pc.dim("--- what-if: user .npmrc output (not written) ---"));
 			console.log(npmrc);
+			console.log(pc.dim("--- end what-if ---"));
 		} else {
 			await withSpinner(`Writing user .npmrc`, logger, (logger) => {
 				return writeNpmrc({
@@ -206,9 +235,14 @@ ${optionsSuffix}`,
 
 		return StatusCodes.Success;
 	} catch (error) {
-		prompts.log.error(
-			`Error: ${error instanceof Error && error.cause instanceof Error ? error.cause.message : ""}`,
-		);
+		const message =
+			error instanceof Error
+				? error.message
+				: typeof error === "string"
+					? error
+					: "An unknown error occurred";
+
+		prompts.log.error(`Error: ${message}`);
 		prompts.cancel(operationMessage("failed"));
 		prompts.outro(outroPrompts);
 

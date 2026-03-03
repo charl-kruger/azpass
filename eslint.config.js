@@ -1,19 +1,12 @@
-import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 import eslint from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
-import jsdoc from "eslint-plugin-jsdoc";
-import n from "eslint-plugin-n";
-import packageJson from "eslint-plugin-package-json";
-import perfectionist from "eslint-plugin-perfectionist";
-import * as regexp from "eslint-plugin-regexp";
 import { defineConfig } from "eslint/config";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
 	{
 		ignores: [
+			"bin",
 			"coverage*",
 			"lib",
 			"node_modules",
@@ -27,14 +20,6 @@ export default defineConfig(
 		},
 	},
 	eslint.configs.recommended,
-	comments.recommended,
-	jsdoc.configs["flat/contents-typescript-error"],
-	jsdoc.configs["flat/logical-typescript-error"],
-	jsdoc.configs["flat/stylistic-typescript-error"],
-	n.configs["flat/recommended"],
-	packageJson.configs.recommended,
-	perfectionist.configs["recommended-natural"],
-	regexp.configs["flat/recommended"],
 	{
 		extends: [
 			...tseslint.configs.strictTypeChecked,
@@ -47,11 +32,10 @@ export default defineConfig(
 					allowDefaultProject: ["*.*s", "eslint.config.js"],
 					defaultProject: "./tsconfig.json",
 				},
-				tsconfigRootDir: dirname(fileURLToPath(import.meta.url)),
+				tsconfigRootDir: import.meta.dirname,
 			},
 		},
 		rules: {
-			// These on-by-default rules work well for this repo if configured
 			"@typescript-eslint/no-unused-vars": [
 				"error",
 				{
@@ -60,58 +44,15 @@ export default defineConfig(
 					caughtErrors: "all",
 					caughtErrorsIgnorePattern: "^_",
 					destructuredArrayIgnorePattern: "^_",
-					varsIgnorePattern: "^_",
 					ignoreRestSiblings: true,
+					varsIgnorePattern: "^_",
 				},
 			],
-			// These on-by-default rules don't work well for this repo and we like them off.
-			"jsdoc/lines-before-block": "off",
-
-			// These off-by-default rules work well for this repo and we like them on.
-			"logical-assignment-operators": [
-				"error",
-				"always",
-				{ enforceForIfStatements: true },
-			],
-			"n/no-unsupported-features/node-builtins": [
-				"error",
-				{ allowExperimental: true },
-			],
-
-			"no-constant-condition": "off",
-			// Stylistic concerns that don't interfere with Prettier
-			"no-useless-rename": "error",
-			"object-shorthand": "error",
-			// "perfectionist/sort-objects": [
-			// 	"error",
-			// 	{
-			// 		order: "asc",
-			// 		partitionByComment: true,
-			// 		type: "natural",
-			// 	},
-			// ],
-
-			"operator-assignment": "error",
-			"perfectionist/sort-objects": ["off"],
-			"perfectionist/sort-object-types": ["off"],
-
-			"jsdoc/match-description": "off",
-		},
-	},
-	{
-		files: ["*.jsonc"],
-		rules: {
-			"jsonc/comma-dangle": "off",
-			"jsonc/no-comments": "off",
-			"jsonc/sort-keys": "error",
 		},
 	},
 	{
 		extends: [tseslint.configs.disableTypeChecked],
 		files: ["**/*.md/*.ts"],
-		rules: {
-			"n/no-missing-import": ["error", { allowModules: ["azdo-npm-auth"] }],
-		},
 	},
 	{
 		files: ["**/*.test.*"],
@@ -121,8 +62,6 @@ export default defineConfig(
 		plugins: { vitest },
 		rules: {
 			...vitest.configs.recommended.rules,
-
-			// These on-by-default rules aren't useful in test files.
 			"@typescript-eslint/no-unsafe-assignment": "off",
 			"@typescript-eslint/no-unsafe-call": "off",
 			"vitest/no-disabled-tests": "off",

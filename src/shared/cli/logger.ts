@@ -1,5 +1,6 @@
-import chalk from "chalk";
 import { EOL } from "node:os";
+
+import pc from "picocolors";
 
 export const fallbackLogger: Logger = {
 	error: console.error.bind(console),
@@ -18,12 +19,10 @@ export interface SpinnerLogger extends Logger {
 type MessageType = "error" | "info";
 
 export function makeLogger(indent = 5): Logger {
-	const prefix = chalk.gray("│") + " ".repeat(indent);
+	const prefix = pc.gray("│") + " ".repeat(indent);
 
 	function colourMessage(message: string, messageType: MessageType) {
-		return messageType === "error"
-			? chalk.red(message)
-			: chalk.blueBright(message);
+		return messageType === "error" ? pc.red(message) : pc.blue(message);
 	}
 
 	function formatMessage(message = "", messageType: MessageType) {

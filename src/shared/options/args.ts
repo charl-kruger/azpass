@@ -9,6 +9,11 @@ export const options = {
 		short: "w",
 	},
 
+	force: {
+		short: "x",
+		type: "boolean",
+	},
+
 	organization: {
 		short: "o",
 		type: "string",
@@ -65,8 +70,6 @@ export interface DocOption {
 
 export type ValidOption = keyof typeof options;
 
-// two modes: use resource group and subscription name to get branch resources, or pass explicit resource names
-
 export const allArgOptions: Record<ValidOption, DocOption> = {
 	config: {
 		...options.config,
@@ -78,8 +81,16 @@ export const allArgOptions: Record<ValidOption, DocOption> = {
 	"what-if": {
 		...options["what-if"],
 		description:
-			"If provided, will not write output to to a user .npmrc file; will instead print to stdout",
+			"If provided, will not write to the user .npmrc file; will instead print to stdout",
 		docsSection: "optional",
+	},
+
+	force: {
+		...options.force,
+		description:
+			"If provided, bypasses CI environment detection and writes the user .npmrc file",
+		docsSection: "optional",
+		type: "boolean",
 	},
 
 	organization: {
@@ -106,7 +117,7 @@ export const allArgOptions: Record<ValidOption, DocOption> = {
 	registry: {
 		...options.registry,
 		description:
-			"The registry to use, eg 'https://pkgs.dev.azure.com/johnnyreilly/_packaging/npmrc-script-organization/npm/registry/' - only required if not parsing from the .npmrc file",
+			"The registry to use, eg 'https://pkgs.dev.azure.com/charlkruger/_packaging/npmrc-script-organization/npm/registry/' - only required if not parsing from the .npmrc file",
 		docsSection: "optional",
 	},
 

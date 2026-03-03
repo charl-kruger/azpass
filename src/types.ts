@@ -1,13 +1,13 @@
 export interface ParsedProjectNpmrc {
-	/** eg `@myorg:registry=https://pkgs.dev.azure.com/johnnyreilly/_packaging/npmrc-script-organization/npm/registry/` */
+	/** eg `@myorg:registry=https://pkgs.dev.azure.com/charlkruger/_packaging/npmrc-script-organization/npm/registry/` */
 	fullRegistryMatch: string | undefined;
-	/** eg `johnnyreilly` */
+	/** eg `charlkruger` */
 	organization: string;
 	/** eg `@myorg` */
 	scope: string | undefined;
-	/** eg `//pkgs.dev.azure.com/johnnyreilly/_packaging/npmrc-script-organization/npm/` */
+	/** eg `//pkgs.dev.azure.com/charlkruger/_packaging/npmrc-script-organization/npm/` */
 	urlWithoutRegistryAtEnd: string;
-	/** eg `//pkgs.dev.azure.com/johnnyreilly/_packaging/npmrc-script-organization/npm/registry/` */
+	/** eg `//pkgs.dev.azure.com/charlkruger/_packaging/npmrc-script-organization/npm/registry/` */
 	urlWithoutRegistryAtStart: string;
 }
 

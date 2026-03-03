@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`azdo-npm-auth` is a CLI tool and library that sets up local authentication to Azure DevOps npm feeds. It creates/updates the user's `~/.npmrc` with Azure DevOps PAT (Personal Access Token) credentials. It uses Azure CLI authentication (`@azure/identity`) to generate tokens via the Azure DevOps REST API.
+`azpass` is a CLI tool and library that sets up local authentication to Azure DevOps npm feeds. It creates/updates the user's `~/.npmrc` with Azure DevOps PAT (Personal Access Token) credentials. It uses Azure CLI authentication (`@azure/identity`) to generate tokens via the Azure DevOps REST API.
 
 ## Common Commands
 
