@@ -23,8 +23,21 @@ import { handleStatusCmd } from "./status-cmd.js";
 import { logHelpText } from "./help.js";
 import { getVersionFromPackageJson } from "./package-json.js";
 
-const operationMessage = (verb: string) =>
-	`Operation ${verb}. Exiting - maybe another time? 👋`;
+const operationMessage = (verb: string) => `Operation ${verb}.`;
+
+function getErrorMessage(error: unknown): string {
+	if (error instanceof Error) {
+		const cause = error.cause;
+		const causeMessage =
+			cause instanceof Error
+				? `\n\n${getErrorMessage(cause)}`
+				: typeof cause === "string"
+					? `\n\n${cause}`
+					: "";
+		return `${error.message}${causeMessage}`;
+	}
+	return typeof error === "string" ? error : "An unknown error occurred";
+}
 
 export async function bin(args: string[]) {
 	// Subcommand dispatch (before any parseArgs processing)
@@ -42,8 +55,8 @@ export async function bin(args: string[]) {
 
 	const version = await getVersionFromPackageJson();
 
-	const introPrompts = `${pc.blue(`📦🔑 Welcome to`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}! 📦🔑`)}`;
-	const outroPrompts = `${pc.blue(`📦🔑 Thanks for using`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}! 📦🔑`)}`;
+	const introPrompts = `${pc.blue(` Welcome to`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}!`)}`;
+	const outroPrompts = `${pc.blue(` Thanks for using`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}!`)}`;
 
 	const { values } = parseArgs({
 		args,
@@ -235,12 +248,7 @@ ${optionsSuffix}`,
 
 		return StatusCodes.Success;
 	} catch (error) {
-		const message =
-			error instanceof Error
-				? error.message
-				: typeof error === "string"
-					? error
-					: "An unknown error occurred";
+		const message = getErrorMessage(error);
 
 		prompts.log.error(`Error: ${message}`);
 		prompts.cancel(operationMessage("failed"));
