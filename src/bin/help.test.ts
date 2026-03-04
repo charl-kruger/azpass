@@ -22,12 +22,15 @@ describe("logHelpText", () => {
 	});
 
 	it("logs help text when called", () => {
-		logHelpText([]);
+		logHelpText("1.0.0");
 
 		expect(mockConsoleLog.mock.calls).toMatchInlineSnapshot(`
 			[
 			  [
-			    "Configure local development environments for Azure apps with one command",
+			    "azpass 1.0.0",
+			  ],
+			  [
+			    "Authenticate npm to Azure DevOps private feeds",
 			  ],
 			  [
 			    " ",

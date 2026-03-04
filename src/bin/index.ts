@@ -55,9 +55,6 @@ export async function bin(args: string[]) {
 
 	const version = await getVersionFromPackageJson();
 
-	const introPrompts = `${pc.blue(` Welcome to`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}!`)}`;
-	const outroPrompts = `${pc.blue(` Thanks for using`)} ${pc.bgCyan(pc.black(`azpass`))} ${pc.blue(`${version}!`)}`;
-
 	const { values } = parseArgs({
 		args,
 		options,
@@ -65,7 +62,7 @@ export async function bin(args: string[]) {
 	});
 
 	if (values.help) {
-		logHelpText([introPrompts]);
+		logHelpText(version);
 		return StatusCodes.Success;
 	}
 
@@ -74,7 +71,7 @@ export async function bin(args: string[]) {
 		return StatusCodes.Success;
 	}
 
-	prompts.intro(introPrompts);
+	prompts.intro(`${pc.bold("azpass")} ${pc.dim(version)}`);
 
 	const globalConfig = await readConfig();
 
@@ -117,7 +114,6 @@ export async function bin(args: string[]) {
 		);
 
 		prompts.cancel(operationMessage("failed"));
-		prompts.outro(outroPrompts);
 
 		return StatusCodes.Failure;
 	}
@@ -139,7 +135,6 @@ export async function bin(args: string[]) {
 		logger.error(
 			`Detected that you are running on a CI server (${ci.name ?? ""}) and so will not generate a user .npmrc file. Use --force to override.`,
 		);
-		prompts.outro(outroPrompts);
 
 		return StatusCodes.Success;
 	}
@@ -244,7 +239,7 @@ ${optionsSuffix}`,
 			});
 		}
 
-		prompts.outro(outroPrompts);
+		prompts.outro(pc.green("Done"));
 
 		return StatusCodes.Success;
 	} catch (error) {
@@ -252,7 +247,6 @@ ${optionsSuffix}`,
 
 		prompts.log.error(`Error: ${message}`);
 		prompts.cancel(operationMessage("failed"));
-		prompts.outro(outroPrompts);
 
 		return StatusCodes.Failure;
 	}

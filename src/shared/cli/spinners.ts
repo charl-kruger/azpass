@@ -17,11 +17,9 @@ export type SpinnerTask<Return> = (logger: SpinnerLogger) => Promise<Return>;
 
 export async function withSpinner<Return>(
 	label: string,
-	logger: Logger,
+	_logger: Logger,
 	task: SpinnerTask<Return>,
 ) {
-	logger.info(pc.green(`🎬 Starting ${lowerFirst(label)}.`));
-
 	const spinnerLogger = makeSpinnerLogger(makeLogger());
 
 	spinner.start(`${label}...`);
@@ -29,13 +27,13 @@ export async function withSpinner<Return>(
 	try {
 		const result = await task(spinnerLogger);
 
-		spinner.stop(pc.green(`✅ Passed ${lowerFirst(label)}.`));
+		spinner.stop(pc.green(`✓ ${label}`));
 
 		spinnerLogger.flush();
 
 		return result;
 	} catch (error) {
-		spinner.error(pc.red(`❌ Error ${lowerFirst(label)}.`));
+		spinner.error(pc.red(`✗ ${label}`));
 
 		spinnerLogger.flush();
 

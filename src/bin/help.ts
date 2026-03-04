@@ -18,19 +18,11 @@ interface SubsectionFlag {
 	type: string;
 }
 
-export function logHelpText(introLogs: string[]): void {
+export function logHelpText(version: string): void {
 	const helpTextSections = createHelpTextSections();
 
-	for (const log of introLogs) {
-		console.log(log);
-		console.log(" ");
-	}
-
-	console.log(
-		pc.cyan(
-			`Configure local development environments for Azure apps with one command`,
-		),
-	);
+	console.log(`${pc.bold("azpass")} ${pc.dim(version)}`);
+	console.log(pc.dim(`Authenticate npm to Azure DevOps private feeds`));
 
 	console.log(" ");
 	console.log(pc.bgGreen(pc.black("Subcommands:")));
