@@ -32,9 +32,24 @@ export async function createPat({
 	// get a token that can be used to authenticate to Azure DevOps
 	// taken from https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/manage-personal-access-tokens-via-api?view=azure-devops#configure-a-quickstart-application
 	// 'Update the SCOPE configuration variable to "499b84ac-1321-427f-aa17-267ca6975798/.default" to refer to the Azure DevOps resource and all of its scopes.'
-	const token = await credential.getToken([
-		"499b84ac-1321-427f-aa17-267ca6975798",
-	]);
+	let token;
+	try {
+		token = await credential.getToken(["499b84ac-1321-427f-aa17-267ca6975798"]);
+	} catch (error) {
+		const msg = error instanceof Error ? error.message : "";
+		const needsLogin =
+			msg.includes("Interactive authentication") ||
+			msg.includes("AADSTS") ||
+			msg.includes("az login") ||
+			msg.includes("refresh token has expired");
+		if (needsLogin) {
+			throw new Error(
+				`Azure CLI authentication required. Please run:\n\n  az login\n\nThen try azpass again.`,
+				{ cause: error },
+			);
+		}
+		throw error;
+	}
 
 	logger.info(`Created Azure CLI Token`);
 	logger.info();
