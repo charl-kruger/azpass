@@ -1,5 +1,6 @@
 import * as prompts from "@clack/prompts";
 import pc from "picocolors";
+import { fromZodError } from "zod-validation-error";
 
 import {
 	configKeys,
@@ -37,9 +38,13 @@ export async function handleConfigCmd(args: string[]): Promise<StatusCode> {
 		return handleSet(key, value);
 	}
 
-	prompts.log.error(
-		`Unknown config subcommand: ${subcommand}. Use list, get, or set.`,
-	);
+	if (subcommand) {
+		prompts.log.error(
+			`Unknown config subcommand: ${subcommand}. Use list, get, or set.`,
+		);
+	} else {
+		prompts.log.error(`Usage: azpass config <list|get|set>`);
+	}
 	return StatusCodes.Failure;
 }
 
@@ -105,7 +110,9 @@ async function handleSet(key: string, value: string): Promise<StatusCode> {
 	const validation = configSchema.safeParse(updated);
 
 	if (!validation.success) {
-		prompts.log.error(`Invalid value for ${key}: ${validation.error.message}`);
+		prompts.log.error(
+			`Invalid value for ${key}: ${fromZodError(validation.error).message}`,
+		);
 		return StatusCodes.Failure;
 	}
 
